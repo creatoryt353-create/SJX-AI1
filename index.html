@@ -1,0 +1,634 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1a0f3d"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SJX AI"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SJX AI</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: single mobile column in the style of the SJX AI app. Header, one pane per bottom-nav tab, fixed seven-tab bar. */
+:root{
+  --bg:#0a0614; --bg-top:#1a0f3d; --card:#150f2b; --card2:#1d1540; --line:#2b2152; --input:#08050f;
+  --fg:#f3efff; --muted:#a79cc8; --dim:#7d72a3;
+  --p1:#b57cff; --p2:#8b5cf6; --p3:#6d28d9; --bar:#7c4dff;
+  --bad:#f87171; --warn:#fbbf24;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--bg);
+  background-image:linear-gradient(180deg,var(--bg-top) 0,var(--bg) 520px);
+  background-repeat:no-repeat;
+  color:var(--fg); font:16px/1.5 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:18px 110px;
+  min-height:100%;
+}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px;min-width:0}
+h1,h2,h3,p{margin:0}
+button,select,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--p1);outline-offset:2px}
+
+.brand h1{font-size:2.3rem;font-weight:800;letter-spacing:-.02em;color:var(--p1);line-height:1.1}
+.brand p{color:var(--muted);margin-top:6px;font-size:1rem}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.card h2{font-size:1.25rem;font-weight:700;color:var(--p1);text-wrap:balance}
+.lbl{display:block;color:var(--muted);font-size:.95rem;margin-bottom:6px}
+textarea.in,select.in,input.in{width:100%;background:var(--input);border:1px solid var(--line);border-radius:18px;padding:14px 16px;font-size:1.05rem;transition:border-color .2s,box-shadow .2s}
+textarea.in{min-height:120px;resize:vertical;line-height:1.45}
+textarea.in:focus,select.in:focus,input.in:focus{border-color:var(--p2);box-shadow:0 0 0 3px rgba(139,92,246,.25);outline:none}
+select.in{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23a79cc8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two>div{min-width:0}
+.go{width:100%;border:0;border-radius:18px;padding:16px;font-size:1.15rem;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--p2),var(--p3));box-shadow:0 8px 24px rgba(109,40,217,.35);transition:transform .15s,filter .2s}
+.go:hover:not(:disabled){filter:brightness(1.12)}
+.go:active:not(:disabled){transform:scale(.985)}
+.go:disabled{opacity:.6;cursor:not-allowed}
+.pill{border:1px solid var(--line);background:transparent;color:var(--p1);font-weight:700;border-radius:16px;padding:12px 18px;cursor:pointer;font-size:1rem;transition:background .2s,border-color .2s,transform .15s;min-width:0}
+.pill:hover:not(:disabled){background:var(--card2);border-color:var(--p2)}
+.pill:active:not(:disabled){transform:scale(.97)}
+.pill:disabled{opacity:.45;cursor:not-allowed}
+.pill.sm{padding:9px 14px;font-size:.9rem;border-radius:14px}
+.pill.on{background:var(--card2);border-color:var(--p2)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.link{display:inline-block;text-decoration:none;text-align:center}
+
+.status{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:11px 14px;color:var(--muted);font-size:.95rem}
+.status span{flex:1;min-width:0;overflow-wrap:anywhere}
+.status.err{border-color:rgba(248,113,113,.55);color:#fecaca;background:rgba(248,113,113,.08)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--p2);flex:none;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+
+.rtitle{font-size:1.45rem;font-weight:800;color:var(--p1);line-height:1.25;text-wrap:balance}
+.sec{border-left:5px solid var(--bar);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:2px}
+.sec b{font-size:.95rem;letter-spacing:.06em;color:var(--p1);font-weight:700}
+.sec p{font-size:1.1rem;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.cursor::after{content:"";display:inline-block;width:7px;height:1em;background:var(--p2);margin-left:4px;vertical-align:-2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.opt{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.opt:first-of-type{border-top:0;padding-top:0}
+.opt div{min-width:0}
+.opt p{font-size:1.05rem;overflow-wrap:anywhere}
+.opt small{color:var(--muted);font-size:.9rem}
+.score-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.score-top strong{font-size:2.2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.score-top span{color:var(--muted);font-size:.92rem}
+.bar{display:flex;flex-direction:column;gap:6px}
+.bar div:first-child{display:flex;justify-content:space-between;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.bar div:first-child b{font-weight:800}
+.track{height:12px;background:var(--input);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p2),var(--p1));border-radius:99px;transition:width .6s ease}
+
+.note{color:var(--muted);font-size:.9rem}
+.lib{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.lib:first-of-type{border-top:0;padding-top:0}
+.lib b{overflow-wrap:anywhere}
+.lib small{color:var(--muted)}
+.empty{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--input);color:var(--muted);padding:9px 14px;border-radius:999px;cursor:pointer;font-size:.95rem}
+.chip[aria-pressed="true"]{background:linear-gradient(90deg,var(--p2),var(--p3));border-color:transparent;color:#fff;font-weight:600}
+.plan{border:1px solid var(--line);background:var(--input);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.plan b{font-size:1.1rem}
+.plan span{color:var(--muted);font-size:.95rem}
+.day{padding:12px 0;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.day:first-of-type{border-top:0;padding-top:0}
+.day div{min-width:0}
+.day b{color:var(--p1)}
+.day p{overflow-wrap:anywhere}
+.day small{color:var(--muted);display:block;overflow-wrap:anywhere}
+pre.txt{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.55}
+
+nav.bar7{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(12,8,26,.96);border-top:1px solid var(--line);display:flex;gap:2px;
+  padding:8px max(6px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-right,0px));backdrop-filter:blur(10px)}
+.tab{flex:1;min-width:0;border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:14px;cursor:pointer;font-size:.72rem;font-weight:600}
+.tab i{font-style:normal;font-size:1.45rem;line-height:1.1}
+.tab[aria-selected="true"]{background:var(--card2);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:#241945;border:1px solid var(--p2);padding:10px 16px;border-radius:14px;font-size:.95rem;opacity:0;pointer-events:none;transition:all .25s;z-index:40;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:360px){.two{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <h1>SJX AI</h1>
+    <p>Your AI Creator Studio · Create Smarter. Grow Faster.</p>
+  </header>
+
+  <div class="status" id="status" hidden role="status" aria-live="polite">
+    <i class="dot" id="dot"></i><span id="status-t"></span>
+    <button class="pill sm" id="stop" hidden>Stop</button>
+  </div>
+
+  <!-- STUDIO -->
+  <section class="pane" id="p-studio">
+    <div class="wrap">
+      <div class="card">
+        <h2>Sirf ek idea likho</h2>
+        <div>
+          <label class="lbl" for="idea">Idea / topic</label>
+          <textarea class="in" id="idea" placeholder="Example: Instagram hack kaise hota hai"></textarea>
+        </div>
+        <div class="two">
+          <div><label class="lbl" for="cat">Category</label><select class="in" id="cat"></select></div>
+          <div><label class="lbl" for="dur">Duration</label><select class="in" id="dur"></select></div>
+        </div>
+        <button class="go" id="go">✨ Script banao</button>
+      </div>
+
+      <div class="card" id="res" hidden>
+        <h2 class="rtitle" id="r-title"></h2>
+        <div id="r-secs" style="display:flex;flex-direction:column;gap:14px"></div>
+        <div class="row">
+          <button class="pill" id="r-copy">Copy</button>
+          <button class="pill" id="r-vo">Voiceover</button>
+          <button class="pill" id="r-txt">TXT</button>
+          <button class="pill" id="r-save">💾 Save</button>
+        </div>
+      </div>
+
+      <div class="card" id="hookcard" hidden>
+        <h2>Hook options</h2>
+        <div id="hook-list"></div>
+      </div>
+
+      <div class="card" id="scorecard" hidden>
+        <h2>Script score</h2>
+        <div class="score-top"><strong id="s-all">0</strong><span>/100 · AI ka andaza, viral ki guarantee nahi</span></div>
+        <div id="s-bars" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOOKS -->
+  <section class="pane" id="p-hooks" hidden>
+    <div class="card">
+      <h2>10 Hook ideas</h2>
+      <div><label class="lbl" for="h-topic">Topic</label><textarea class="in" id="h-topic" placeholder="Kis topic ke liye hooks chahiye?"></textarea></div>
+      <button class="go" id="h-go">🎣 Hooks banao</button>
+      <div id="h-out"></div>
+    </div>
+  </section>
+
+  <!-- IMPROVE -->
+  <section class="pane" id="p-improve" hidden>
+    <div class="card">
+      <h2>Apna script sudharo</h2>
+      <div><label class="lbl" for="i-text">Purana script</label><textarea class="in" id="i-text" style="min-height:160px" placeholder="Apna script yahan paste karo"></textarea></div>
+      <div><label class="lbl" for="i-goal">Kya chahiye?</label><select class="in" id="i-goal"></select></div>
+      <button class="go" id="i-go">🛠️ Script sudharo</button>
+    </div>
+    <div class="card" id="i-res" hidden style="margin-top:16px">
+      <h2>Sudhra hua script</h2>
+      <pre class="txt" id="i-new"></pre>
+      <div class="row"><button class="pill" id="i-copy">Copy</button></div>
+      <h2 style="margin-top:6px">Kya badla</h2>
+      <pre class="txt" id="i-chg"></pre>
+    </div>
+  </section>
+
+  <!-- GROWTH -->
+  <section class="pane" id="p-growth" hidden>
+    <div class="card">
+      <h2>7 din ka content plan</h2>
+      <div><label class="lbl" for="g-niche">Niche / topic</label><textarea class="in" id="g-niche" placeholder="Example: cyber awareness, Instagram safety"></textarea></div>
+      <button class="go" id="g-go">📈 Plan banao</button>
+    </div>
+    <div class="card" id="g-res" hidden style="margin-top:16px">
+      <div id="g-days"></div>
+      <h2>Caption</h2>
+      <pre class="txt" id="g-cap"></pre>
+      <div class="row"><button class="pill sm" id="g-ccap">Copy caption</button></div>
+      <h2>Hashtags</h2>
+      <pre class="txt" id="g-tags"></pre>
+      <div class="row"><button class="pill sm" id="g-ctags">Copy hashtags</button></div>
+    </div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="pane" id="p-library" hidden>
+    <div class="card">
+      <h2>Saved scripts</h2>
+      <div id="lib-list"></div>
+    </div>
+  </section>
+
+  <!-- PRO -->
+  <section class="pane" id="p-pro" hidden>
+    <div class="card">
+      <h2>SJX AI Pro</h2>
+      <div class="plan"><b>Monthly</b><span>Rs 19 / month</span></div>
+      <div class="plan"><b>Yearly</b><span>Rs 199 / year</span></div>
+      <p class="note">Pro plan aur UPI payment SJX AI app mein hoga. Is web page par payment nahi hai, yahan saare features abhi khule hain.</p>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="pane" id="p-settings" hidden>
+    <div class="card">
+      <h2>Settings</h2>
+      <div><span class="lbl">Script language</span><div class="chips" id="s-lang"></div></div>
+      <div><span class="lbl">Tone</span><div class="chips" id="s-tone"></div></div>
+      <div>
+        <span class="lbl">Gemini API keys (optional, 3 tak)</span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input class="in" type="password" id="k1" placeholder="Key 1 (AQ... ya AIza...)" autocomplete="off" spellcheck="false">
+          <input class="in" type="password" id="k2" placeholder="Key 2 (optional)" autocomplete="off" spellcheck="false">
+          <input class="in" type="password" id="k3" placeholder="Key 3 (optional)" autocomplete="off" spellcheck="false">
+        </div>
+        <p class="note" style="margin-top:8px">Keys sirf is phone/browser mein save hoti hain, kisi ko nahi jaati. Zyada keys = zyada free limit. Free key: aistudio.google.com/apikey</p>
+        <div class="row" style="margin-top:8px"><button class="pill" id="k-save">Save karo</button><button class="pill" id="k-test">Test karo</button></div>
+        <p class="note" id="k-note" hidden style="white-space:pre-wrap"></p>
+      </div>
+      <div class="row">
+        <button class="pill" id="s-clear">Library clear karo</button>
+      </div>
+      <p class="note" id="s-clear-note" hidden>Pakka? Saare saved scripts hat jayenge.</p>
+      <div class="row" id="s-clear-row" hidden>
+        <button class="pill" id="s-yes">Haan, clear karo</button>
+        <button class="pill" id="s-no">Nahi</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="bar7" id="nav" aria-label="Main"></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+//#PURE-START
+var LABELS=['HOOK_OPTIONS','HOOK OPTIONS','TITLE','HOOK','PROBLEM','SOLUTION','RESULT','CTA','SCORES','IMPROVED','CHANGES','CAPTION','HASHTAGS'];
+var LABEL_RE=new RegExp('^[\\s#>*_`-]*('+LABELS.join('|')+')[\\s*_`]*(?::[\\s*_`]*(.*))?$','i');
+function clean(l){return l.replace(/\*\*|__/g,'').replace(/\s+$/,'');}
+function blocks(text){
+  var out={},cur=null;
+  String(text||'').split('\n').forEach(function(raw){
+    var line=raw.replace(/\r/g,''),m=line.match(LABEL_RE);
+    if(m){cur=m[1].toUpperCase().replace(' ','_');if(!out[cur])out[cur]=[];var rest=clean(m[2]||'').trim();if(rest)out[cur].push(rest);return;}
+    if(/^[\s*_`-]*(S_(HOOK|AUDIENCE|STORY|EMOTION|CTA)|OVERALL)\s*[:=]/i.test(line))return;
+    if(cur)out[cur].push(clean(line));
+  });
+  Object.keys(out).forEach(function(k){
+    var a=out[k];while(a.length&&!a[0].trim())a.shift();while(a.length&&!a[a.length-1].trim())a.pop();
+    out[k]=a.join('\n').replace(/\n{3,}/g,'\n\n');
+  });
+  return out;
+}
+function num(text,key){var m=String(text||'').match(new RegExp(key+'[\\s*_`]*[:=][\\s*_`]*(\\d{1,3})','i'));return m?Math.min(100,+m[1]):null;}
+function parseRes(text){
+  var b=blocks(text),r={title:(b.TITLE||'').split('\n')[0].trim(),hook:b.HOOK||'',problem:b.PROBLEM||'',solution:b.SOLUTION||'',result:b.RESULT||'',cta:b.CTA||'',hooks:[],scores:null,overall:null};
+  (b.HOOK_OPTIONS||'').split('\n').forEach(function(l){
+    l=l.replace(/^\s*(\d+[\).]|[-*•])\s*/,'').trim();if(!l)return;
+    var i=l.indexOf('|');r.hooks.push(i>0?{type:l.slice(0,i).trim().toLowerCase(),text:l.slice(i+1).trim()}:{type:'',text:l});
+  });
+  var s={hook:num(text,'S_HOOK'),audience:num(text,'S_AUDIENCE'),story:num(text,'S_STORY'),emotion:num(text,'S_EMOTION'),cta:num(text,'S_CTA')};
+  var have=Object.keys(s).filter(function(k){return s[k]!=null;});
+  if(have.length){r.scores=s;}
+  r.overall=num(text,'OVERALL');
+  if(r.overall==null&&have.length)r.overall=Math.round(have.reduce(function(a,k){return a+s[k];},0)/have.length);
+  return r;
+}
+function parseTypedList(text){
+  return String(text||'').split('\n').map(function(l){return clean(l).replace(/^\s*(\d+[\).]|[-*•])\s*/,'').trim();}).filter(Boolean).map(function(l){
+    var i=l.indexOf('|');return i>0?{type:l.slice(0,i).trim().toLowerCase(),text:l.slice(i+1).trim()}:{type:'',text:l};
+  });
+}
+function parseDays(text){
+  var out=[];String(text||'').split('\n').forEach(function(l){
+    var m=clean(l).match(/^[\s#>*_`-]*day\s*(\d+)\s*[|:\-]\s*(.*)$/i);if(!m)return;
+    var p=m[2].split('|');out.push({day:+m[1],idea:(p[0]||'').trim(),hook:(p[1]||'').trim()});
+  });
+  return out;
+}
+function voText(r){return ['hook','problem','solution','result','cta'].map(function(k){return r[k];}).filter(Boolean).join('\n');}
+//#PURE-END
+
+var SEC=[['hook','HOOK'],['problem','PROBLEM'],['solution','SOLUTION'],['result','RESULT'],['cta','CTA']];
+var CATS=['Motivation','Education','Cyber Awareness','Tech','Business','Finance','Health','Funny','Storytelling','Lifestyle'];
+var DURS=[['15 sec',15],['30 sec',30],['45 sec',45],['60 sec',60],['90 sec',90],['2 min',120],['3 min',180],['5 min',300]];
+var LANG={hinglish:'Hinglish: Hindi written in Roman (English) letters, casual conversational mix of Hindi and English words, for example "Agar tum Instagram par grow karna chahte ho, toh ye 3 mistakes aaj hi band kar do." Never use Devanagari.',hindi:'Simple conversational Hindi in Devanagari script.',english:'Simple, natural, conversational English.'};
+var LANG_L={hinglish:'Hinglish',hindi:'Hindi',english:'English'};
+var TONES={Simple:'clear and simple',Viral:'punchy, curiosity-driven, fast pacing',Emotional:'heartfelt and relatable',Funny:'light humour and playful',Professional:'polished and credible'};
+var GOALS=[['Zyada viral banao','make it more viral and attention-grabbing'],['Chhota karo','shorten it by about a third without losing the point'],['Zyada emotional banao','make it more emotional and relatable'],['Simple Hinglish banao','rewrite in simpler everyday Hinglish'],['Hook strong karo','keep the body but write a much stronger hook and CTA']];
+var NAV=[['studio','✨','Studio'],['hooks','🎣','Hooks'],['improve','🛠️','Improve'],['growth','📈','Growth'],['library','📚','Library'],['pro','💎','Pro'],['settings','⚙️','Settings']];
+var KEY='sjxai_library_v1',PREF='sjxai_prefs_v1';
+
+var S={tab:'studio',cat:'Motivation',durIdx:1,lang:'hinglish',tone:'Viral',res:null,running:false,stop:false,ctl:null,libId:null,idea:''};
+var $=function(id){return document.getElementById(id);};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2200);}
+function copy(text,label){
+  var ok=function(){toast((label||'Text')+' copy ho gaya');};
+  var fb=function(){var a=document.createElement('textarea');a.value=text;a.style.cssText='position:fixed;opacity:0;top:0';document.body.appendChild(a);a.select();var s=false;try{s=document.execCommand('copy');}catch(e){}a.remove();s?ok():toast('Copy block hua. Text select karke copy karo.');};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(ok,fb);else fb();
+}
+function load(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==null?def:v;}catch(e){return def;}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+
+/* Gemini: user ki keys (Settings) -> direct; warna server (/api/generate) */
+var resolved=true,dlP=Promise.resolve(null);
+var KEYS='sjxai_keys_v1';
+var MODELS=['gemini-3.8-flash','gemini-3.5-flash-lite','gemini-3.6-flash','gemini-2.5-flash-lite'];
+function getKeys(){var k=load(KEYS,[]);return (Array.isArray(k)?k:[]).map(function(x){return String(x||'').trim();}).filter(Boolean).slice(0,3);}
+function errMsg(r){return r.json().then(function(j){return (j&&j.error&&j.error.message)||(j&&j.detail)||('HTTP '+r.status);},function(){return 'HTTP '+r.status;});}
+async function readSSE(r,o){
+  var rd=r.body.getReader(),dec=new TextDecoder(),buf='',acc='';
+  for(;;){
+    var x=await rd.read();if(x.done)break;
+    buf+=dec.decode(x.value,{stream:true});
+    var lines=buf.split('\n');buf=lines.pop();
+    for(var i=0;i<lines.length;i++){
+      var l=lines[i].trim();if(l.indexOf('data:')!==0)continue;
+      try{var j=JSON.parse(l.slice(5));var ps=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[];
+        ps.forEach(function(p){if(p.text)acc+=p.text;});
+        if(o&&o.onText&&acc)o.onText({text:acc});}catch(e){}
+    }
+  }
+  if(!acc.trim())throw {code:'refused'};
+  return {text:acc};
+}
+function body(prompt,model,min){
+  var g={maxOutputTokens:4096};
+  if(!min){
+    if(model.indexOf('gemini-3')===0)g.thinkingConfig={thinkingLevel:'low'};
+    else{g.temperature=0.9;if(model.indexOf('gemini-2.5')===0)g.thinkingConfig={thinkingBudget:0};}
+  }
+  return JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:g});
+}
+function callG(model,key,prompt,signal,min){
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':streamGenerateContent?alt=sse',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:body(prompt,model,min),signal:signal});
+}
+async function direct(prompt,keys,o){
+  var start=Math.floor(Math.random()*keys.length),sawLimit=false,bad=false,detail='',n=0,sig=o&&o.signal;
+  for(var m=0;m<MODELS.length;m++){
+    for(var k=0;k<keys.length;k++){
+      if(++n>8)break;
+      var key=keys[(start+k)%keys.length],r;
+      try{
+        r=await callG(MODELS[m],key,prompt,sig,false);
+        if(r.status===400){var m1=await errMsg(r.clone());if(!/api key|API_KEY/i.test(m1))r=await callG(MODELS[m],key,prompt,sig,true);}
+      }catch(e){if(e&&e.name==='AbortError')throw {code:'cancelled'};if(!detail)detail='Network error';continue;}
+      if(r.ok)return readSSE(r,o);
+      var msg=await errMsg(r);if(!detail)detail=MODELS[m]+': '+msg;
+      if(r.status===429||r.status>=500)sawLimit=true;else if(r.status===400||r.status===401||r.status===403){if(/api key|API_KEY|permission|denied|invalid/i.test(msg))bad=true;}
+    }
+  }
+  throw {code:(bad&&!sawLimit)?'bad_key':(sawLimit?'rate_limited':'upstream_error'),detail:detail};
+}
+async function viaServer(prompt,o){
+  var r;
+  try{r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt}),signal:o&&o.signal});}
+  catch(e){if(e&&e.name==='AbortError')throw {code:'cancelled'};throw {code:'no_key'};}
+  if(r.ok&&(r.headers.get('content-type')||'').indexOf('event-stream')>=0)return readSSE(r,o);
+  if(r.status===404||r.status===405||r.status===0)throw {code:'no_key'};
+  var d={};try{d=await r.json();}catch(e){}
+  throw {code:d.code||'upstream_error',detail:d.detail||''};
+}
+async function sampleFn(prompt,o){
+  var keys=getKeys();
+  return keys.length?direct(prompt,keys,o):viaServer(prompt,o);
+}
+var sampleP=Promise.resolve(sampleFn);
+async function testKey(key){
+  try{
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:'Reply with the single word OK'}]}]})});
+    if(r.ok)return {ok:true};
+    return {ok:false,msg:await errMsg(r)};
+  }catch(e){return {ok:false,msg:'Network error. Internet check karo.'};}
+}
+
+/* status + busy */
+function showStatus(msg,kind,busy){var s=$('status');s.hidden=!msg;s.className='status'+(kind==='err'?' err':'');$('status-t').textContent=msg||'';$('dot').hidden=!busy;$('stop').hidden=!busy;}
+function syncBusy(){
+  document.querySelectorAll('.ai').forEach(function(b){b.disabled=S.running||(resolved&&!sampleFn);});
+}
+var ERR={no_key:'Pehle Settings mein apni free Gemini key daalo (Key 1).',bad_key:'Gemini key sahi nahi hai ya band hai. Settings mein Test karke dekho.',not_granted:'AI permission allow nahi hui. Button dobara dabao aur Allow karo.',rate_limited:'Free limit full hai ya bahut log use kar rahe hain. 1 minute baad try karo, ya Settings mein 2-3 keys daalo.',session_expired:'Page refresh karo.',sampling_disabled:'Is account par AI available nahi hai.',refused:'AI ne is input par jawab nahi diya. Idea thoda badal ke try karo.',empty_completion:'AI ne kuch nahi likha. Idea thoda detail mein likho.',unavailable:'AI is view mein available nahi hai.',upstream_error:'Connection issue aaya. Dobara try karo.'};
+var NO_RETRY=['no_key','bad_key','not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed','session_expired','invalid_request','prompt_too_large','refused','rate_limited','empty_completion','invalid_json'];
+async function ask(prompt,onText){
+  var s=sampleFn||await sampleP;if(!s)throw {code:'unavailable'};
+  var last;
+  for(var a=0;a<3;a++){
+    if(S.stop)throw {code:'cancelled'};
+    var ctl=new AbortController();S.ctl=ctl;
+    try{return await s(prompt,{signal:ctl.signal,cache:false,modelTier:'quick',onText:function(u){if(onText)onText(u.text);}});}
+    catch(e){last=e;if(e.code==='cancelled'||S.stop)throw e;if(NO_RETRY.indexOf(e.code)>=0)throw e;if(a<2){showStatus('Connection issue, dobara try kar raha hoon ('+(a+1)+'/2)…','',true);await sleep(1200*(a+1));}}
+  }
+  if(last&&last.text&&last.text.length>60)return {text:last.text,partial:true};
+  throw last;
+}
+async function run(btn,busyLabel,prompt,onText){
+  if(S.running)return null;
+  S.running=true;S.stop=false;syncBusy();
+  var old=btn?btn.textContent:'';if(btn)btn.textContent=busyLabel;
+  showStatus('Likh raha hoon…','',true);
+  try{var r=await ask(prompt,onText);showStatus('');return r.text;}
+  catch(e){
+    if(e&&e.code==='cancelled')showStatus('Stop kar diya.');
+    else showStatus((ERR[e&&e.code]||('Kuch gadbad hui ('+((e&&e.code)||'error')+'). Dobara try karo.'))+(e&&e.detail&&e.code!=='no_key'?' ['+String(e.detail).slice(0,140)+']':''),'err');
+    return null;
+  }finally{S.running=false;if(btn)btn.textContent=old;syncBusy();}
+}
+
+/* prompts */
+function studioPrompt(){
+  var d=DURS[S.durIdx],words=Math.round(d[1]*2.4),w=function(f){return Math.max(6,Math.round(words*f));};
+  return [
+  'You are SJX AI, a scriptwriter for Indian short-video creators (Reels and Shorts).',
+  'Idea/topic: """'+S.idea.trim().slice(0,3000)+'"""',
+  'Category: '+S.cat,
+  'Video length: '+d[0]+' (about '+words+' spoken words in total)',
+  'Language: '+LANG[S.lang],
+  'Tone: '+TONES[S.tone],
+  '',
+  'Write the script with this fixed 5-step formula, in this order, never skipping a step: HOOK, PROBLEM, SOLUTION, RESULT, CTA.',
+  'Word budget: HOOK about '+w(.1)+', PROBLEM about '+w(.2)+', SOLUTION about '+w(.4)+', RESULT about '+w(.15)+', CTA about '+w(.15)+' words.',
+  'HOOK grabs attention in the first 1-3 seconds. PROBLEM is a pain point the viewer relates to. SOLUTION gives practical clear steps. RESULT is a realistic benefit with a satisfying ending and never promises unrealistic results. CTA asks for comment, share or follow.',
+  'Rules: short one-line sentences, one per line, easy to say aloud. No emojis, brackets or stage directions. Do not invent statistics. Facts must be true.',
+  '',
+  'Reply in plain text only, exactly in this format, with nothing before or after:',
+  'TITLE: catchy title in the script language, maximum 10 words',
+  'HOOK:','(lines)','PROBLEM:','(lines)','SOLUTION:','(lines)','RESULT:','(lines)','CTA:','(lines)',
+  'HOOK_OPTIONS:',
+  'curiosity | a different hook under 15 words',
+  'relatable | a different hook under 15 words',
+  'urgency | a different hook under 15 words',
+  'SCORES:',
+  'S_HOOK: number 0-100','S_AUDIENCE: number 0-100','S_STORY: number 0-100','S_EMOTION: number 0-100','S_CTA: number 0-100','OVERALL: number 0-100',
+  'The scores are your honest estimate of this script. Make them realistic and varied, mostly between 55 and 92.'
+  ].join('\n');
+}
+function hooksPrompt(t){return ['Write 10 different video hooks for this topic, for Indian Reels and Shorts.','Topic: """'+t.slice(0,2000)+'"""','Language: '+LANG[S.lang],'Tone: '+TONES[S.tone],'Each hook is under 15 words and works in the first 3 seconds. Use a different angle each time (curiosity, relatable, urgency, shock, question, story, fear, myth-buster, benefit, challenge).','Never promise unrealistic results. Do not invent statistics.','Reply with exactly 10 lines, no numbering, each line: angle | hook'].join('\n');}
+function improvePrompt(t,goal){return ['You are SJX AI, an editor for Indian short-video scripts.','Task: '+goal+'.','Language: '+LANG[S.lang],'Keep the creator\'s meaning and facts. Short one-line sentences, one per line, no emojis or brackets. Never add unrealistic promises.','ORIGINAL SCRIPT:','"""',t.slice(0,6000),'"""','','Reply in plain text, exactly:','IMPROVED:','(the improved script)','CHANGES:','- three to five short bullets saying what you changed, in Hinglish'].join('\n');}
+function growthPrompt(t){return ['You are SJX AI, a content strategist for Indian short-video creators.','Niche/topic: """'+t.slice(0,2000)+'"""','Language: '+LANG[S.lang],'Make a 7-day Reels plan. Each day has one video idea and one hook under 15 words. No unrealistic promises.','Reply in plain text, exactly:','DAY 1 | video idea | hook','DAY 2 | video idea | hook','(continue to DAY 7)','CAPTION:','(one caption under 500 characters)','HASHTAGS:','(15 relevant hashtags on one line)'].join('\n');}
+
+/* result rendering */
+var raf=0;
+function renderRes(live){
+  var r=S.res;$('res').hidden=!r;$('hookcard').hidden=!(r&&r.hooks.length);$('scorecard').hidden=!(r&&r.scores);
+  if(!r)return;
+  $('r-title').textContent=r.title||'Aapka script';
+  var host=$('r-secs');host.replaceChildren();
+  var lastK=null;SEC.forEach(function(s){if(r[s[0]])lastK=s[0];});
+  SEC.forEach(function(s){
+    if(!r[s[0]])return;
+    var d=el('div','sec');d.append(el('b','',s[1]));var p=el('p',live&&s[0]===lastK?'cursor':'',r[s[0]]);d.append(p);host.append(d);
+  });
+  var hl=$('hook-list');hl.replaceChildren();
+  r.hooks.forEach(function(h){
+    var row=el('div','opt'),c=el('div');c.append(el('p','',h.text));if(h.type)c.append(el('small','',h.type));
+    var b=el('button','pill sm','Copy');b.onclick=function(){copy(h.text,'Hook');};row.append(c,b);hl.append(row);
+  });
+  if(r.scores){
+    $('s-all').textContent=r.overall!=null?r.overall:'';
+    var bars=$('s-bars');bars.replaceChildren();
+    [['Hook','hook'],['Audience interest','audience'],['Storytelling','story'],['Emotion','emotion'],['Call to action','cta']].forEach(function(p){
+      var v=r.scores[p[1]];if(v==null)return;
+      var w=el('div','bar'),top=el('div');top.append(el('span','',p[0]),el('b','',String(v)));
+      var tr=el('div','track'),i=el('i');tr.append(i);w.append(top,tr);bars.append(w);
+      requestAnimationFrame(function(){i.style.width=v+'%';});
+    });
+  }
+}
+function scheduleRes(live){if(raf)return;raf=requestAnimationFrame(function(){raf=0;renderRes(live);});}
+function resText(r){
+  var t='SJX AI SCRIPT\n'+'='.repeat(30)+'\n'+(r.title?r.title+'\n\n':'');
+  SEC.forEach(function(s){if(r[s[0]])t+=s[1]+'\n'+r[s[0]]+'\n\n';});
+  if(r.hooks.length){t+='HOOK OPTIONS\n'+r.hooks.map(function(h){return '- '+h.text+(h.type?' ('+h.type+')':'');}).join('\n')+'\n';}
+  return t.trim()+'\n';
+}
+function resultReady(r){return r&&SEC.every(function(s){return r[s[0]];});}
+
+async function generate(){
+  S.idea=$('idea').value;
+  if(!S.idea.trim()){toast('Pehle idea likho');$('idea').focus();return;}
+  S.cat=$('cat').value;S.durIdx=+$('dur').value;S.res=null;S.libId=null;renderRes(false);
+  var txt=await run($('go'),'✨ Likh raha hoon…',studioPrompt(),function(t){S.res=parseRes(t);scheduleRes(true);});
+  if(txt!=null||S.res){if(txt!=null)S.res=parseRes(txt);renderRes(false);if(S.res&&!resultReady(S.res))toast('Kuch section khali reh gaye. Dobara Script banao dabao.');}
+}
+function saveToLib(){
+  if(!S.res||!SEC.some(function(s){return S.res[s[0]];})){toast('Pehle script banao');return;}
+  var lib=load(KEY,[]),it={id:S.libId||('l'+Date.now().toString(36)),ts:Date.now(),title:S.res.title||S.idea.trim().slice(0,60)||'Script',cat:S.cat,dur:DURS[S.durIdx][0],idea:S.idea,res:S.res};
+  var i=lib.findIndex(function(x){return x.id===it.id;});if(i>=0)lib[i]=it;else lib.unshift(it);
+  lib=lib.slice(0,60);
+  if(store(KEY,lib)){S.libId=it.id;toast('Library mein save ho gaya');renderLib();}else toast('Save nahi ho paya. Browser storage block ya full hai.');
+}
+async function downloadTxt(text,name){
+  try{var bl=new Blob([text],{type:'text/plain;charset=utf-8'}),x=document.createElement('a');x.href=URL.createObjectURL(bl);x.download=name;document.body.appendChild(x);x.click();x.remove();toast('TXT save ho gaya');}
+  catch(e){copy(text,'Text');}
+}
+function slug(s){return (String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'script').slice(0,50);}
+
+/* other panes */
+function typedList(host,items){
+  host.replaceChildren();
+  items.forEach(function(h){
+    var row=el('div','opt'),c=el('div');c.append(el('p','',h.text));if(h.type)c.append(el('small','',h.type));
+    var b=el('button','pill sm','Copy');b.onclick=function(){copy(h.text,'Hook');};row.append(c,b);host.append(row);
+  });
+}
+async function genHooks(){
+  var t=$('h-topic').value.trim();if(!t){toast('Pehle topic likho');return;}
+  $('h-out').replaceChildren();
+  var txt=await run($('h-go'),'🎣 Likh raha hoon…',hooksPrompt(t),function(x){typedList($('h-out'),parseTypedList(x));});
+  if(txt!=null)typedList($('h-out'),parseTypedList(txt));
+}
+async function genImprove(){
+  var t=$('i-text').value.trim();if(!t){toast('Pehle script paste karo');return;}
+  var goal=GOALS[+$('i-goal').value][1];
+  var show=function(x){var b=blocks(x);$('i-res').hidden=false;$('i-new').textContent=b.IMPROVED||'';$('i-chg').textContent=b.CHANGES||'';};
+  var txt=await run($('i-go'),'🛠️ Sudhar raha hoon…',improvePrompt(t,goal),show);
+  if(txt!=null)show(txt);
+}
+async function genGrowth(){
+  var t=$('g-niche').value.trim();if(!t){toast('Pehle niche ya topic likho');return;}
+  var show=function(x){
+    var days=parseDays(x),b=blocks(x);$('g-res').hidden=false;
+    var host=$('g-days');host.replaceChildren();
+    days.forEach(function(d){
+      var row=el('div','day'),c=el('div');c.append(el('b','','Day '+d.day),el('p','',d.idea));if(d.hook)c.append(el('small','','Hook: '+d.hook));
+      var cb=el('button','pill sm','Copy');cb.onclick=function(){copy('Day '+d.day+': '+d.idea+(d.hook?'\nHook: '+d.hook:''),'Day '+d.day);};row.append(c,cb);host.append(row);
+    });
+    $('g-cap').textContent=b.CAPTION||'';$('g-tags').textContent=(b.HASHTAGS||'').replace(/\s*\n\s*/g,' ');
+  };
+  var txt=await run($('g-go'),'📈 Likh raha hoon…',growthPrompt(t),show);
+  if(txt!=null)show(txt);
+}
+function renderLib(){
+  var lib=load(KEY,[]),host=$('lib-list');host.replaceChildren();
+  if(!lib.length){host.append(el('p','empty','Abhi koi saved script nahi hai. Studio mein script banao aur Save dabao.'));return;}
+  lib.forEach(function(it){
+    var w=el('div','lib'),t=el('div');t.append(el('b','',it.title),el('br'),el('small','',it.cat+' · '+it.dur+' · '+new Date(it.ts).toLocaleDateString()));
+    var r=el('div','row'),o=el('button','pill sm','Open'),c=el('button','pill sm','Copy'),d=el('button','pill sm','Delete');
+    o.onclick=function(){S.res=it.res;S.idea=it.idea||'';S.libId=it.id;$('idea').value=S.idea;if(it.cat)$('cat').value=it.cat;setTab('studio');renderRes(false);};
+    c.onclick=function(){copy(resText(it.res),'Script');};
+    d.onclick=function(){var l=load(KEY,[]).filter(function(x){return x.id!==it.id;});store(KEY,l);if(S.libId===it.id)S.libId=null;renderLib();};
+    r.append(o,c,d);w.append(t,r);host.append(w);
+  });
+}
+function setTab(t){
+  S.tab=t;
+  NAV.forEach(function(n){$('p-'+n[0]).hidden=n[0]!==t;});
+  document.querySelectorAll('.tab').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.t===t));});
+  if(t==='library')renderLib();
+  window.scrollTo(0,0);
+}
+function chips(id,items,get,set){
+  var host=$(id);host.replaceChildren();
+  items.forEach(function(it){var b=el('button','chip',it[1]);b.type='button';b.dataset.v=it[0];b.onclick=function(){set(it[0]);paint();savePrefs();};host.append(b);});
+  function paint(){host.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===get()));});}
+  paint();
+}
+function savePrefs(){store(PREF,{lang:S.lang,tone:S.tone,cat:$('cat').value,durIdx:+$('dur').value});}
+
+function init(){
+  CATS.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;$('cat').append(o);});
+  DURS.forEach(function(d,i){var o=document.createElement('option');o.value=String(i);o.textContent=d[0];$('dur').append(o);});
+  GOALS.forEach(function(g,i){var o=document.createElement('option');o.value=String(i);o.textContent=g[0];$('i-goal').append(o);});
+  var p=load(PREF,{});if(p.lang&&LANG[p.lang])S.lang=p.lang;if(p.tone&&TONES[p.tone])S.tone=p.tone;
+  if(p.cat&&CATS.indexOf(p.cat)>=0)S.cat=p.cat;if(p.durIdx!=null&&DURS[p.durIdx])S.durIdx=p.durIdx;
+  $('cat').value=S.cat;$('dur').value=String(S.durIdx);
+  $('cat').onchange=savePrefs;$('dur').onchange=savePrefs;
+  chips('s-lang',Object.keys(LANG_L).map(function(k){return [k,LANG_L[k]];}),function(){return S.lang;},function(v){S.lang=v;});
+  chips('s-tone',Object.keys(TONES).map(function(k){return [k,k];}),function(){return S.tone;},function(v){S.tone=v;});
+  var nav=$('nav');
+  NAV.forEach(function(n){var b=el('button','tab');b.dataset.t=n[0];b.setAttribute('role','tab');var i=el('i','',n[1]);i.setAttribute('aria-hidden','true');b.append(i,el('span','',n[2]));b.onclick=function(){setTab(n[0]);};nav.append(b);});
+  ['go','h-go','i-go','g-go'].forEach(function(id){$(id).classList.add('ai');});
+  setTab('studio');syncBusy();
+
+  $('go').onclick=generate;$('h-go').onclick=genHooks;$('i-go').onclick=genImprove;$('g-go').onclick=genGrowth;
+  $('stop').onclick=function(){S.stop=true;if(S.ctl)S.ctl.abort();};
+  $('r-copy').onclick=function(){copy(resText(S.res),'Script');};
+  $('r-vo').onclick=function(){copy(voText(S.res),'Voiceover text');};
+  $('r-txt').onclick=function(){downloadTxt(resText(S.res),slug(S.res.title||S.idea)+'.txt');};
+  $('r-save').onclick=saveToLib;
+  $('i-copy').onclick=function(){copy($('i-new').textContent,'Script');};
+  $('g-ccap').onclick=function(){copy($('g-cap').textContent,'Caption');};
+  $('g-ctags').onclick=function(){copy($('g-tags').textContent,'Hashtags');};
+  var ks=load(KEYS,[]);['k1','k2','k3'].forEach(function(id,i){$(id).value=ks[i]||'';});
+  function readKeys(){return ['k1','k2','k3'].map(function(id){return $(id).value.trim();}).filter(Boolean);}
+  $('k-save').onclick=function(){store(KEYS,readKeys());toast(readKeys().length?'Keys save ho gayi':'Keys hata di gayi');showStatus('');};
+  $('k-test').onclick=async function(){
+    var ks2=readKeys(),n=$('k-note');n.hidden=false;
+    if(!ks2.length){n.textContent='Pehle koi key daalo.';return;}
+    store(KEYS,ks2);n.textContent='Test ho raha hai…';var out=[];
+    for(var i=0;i<ks2.length;i++){var r=await testKey(ks2[i]);out.push('Key '+(i+1)+': '+(r.ok?'✅ chal rahi hai':'❌ '+r.msg));n.textContent=out.join('\n')+(i<ks2.length-1?'\n…':'');}
+  };
+  if(!getKeys().length){fetch('/api/ping').then(function(r){if(!r.ok)throw 0;},function(){throw 0;}).catch(function(){showStatus('Shuru karne ke liye Settings tab mein apni free Gemini key daalo.','err');});}
+  $('s-clear').onclick=function(){$('s-clear-note').hidden=false;$('s-clear-row').hidden=false;};
+  $('s-no').onclick=function(){$('s-clear-note').hidden=true;$('s-clear-row').hidden=true;};
+  $('s-yes').onclick=function(){store(KEY,[]);S.libId=null;$('s-clear-note').hidden=true;$('s-clear-row').hidden=true;renderLib();toast('Library clear ho gayi');};
+}
+init();
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script>
+
+</body></html>
